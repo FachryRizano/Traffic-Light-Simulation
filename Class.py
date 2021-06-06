@@ -55,11 +55,11 @@ class Traffic:
         for i in range(3):
             GPIO.setup(self.getPinTraffic()[i],GPIO.OUT)
         
-        if color == "green":
+        if color == "red":
             GPIO.output(self.getPinTraffic()[0],True)
             GPIO.output(self.getPinTraffic()[1],False)
             GPIO.output(self.getPinTraffic()[2],False)
-        elif color == "red":
+        elif color == "green":
             GPIO.output(self.getPinTraffic()[0],False)
             GPIO.output(self.getPinTraffic()[1],False)
             GPIO.output(self.getPinTraffic()[2],True)

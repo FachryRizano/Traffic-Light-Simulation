@@ -12,10 +12,10 @@ import tm1637
 #CLK -> GPIO23 (Pin 16)
 #Di0 -> GPIO24 (Pin 18)
 
-Display = tm1637.TM1637(1,24,tm1637.BRIGHT_TYPICAL)
+Display = tm1637.TM1637(1,24)
 
-Display.Clear()
-Display.SetBrightnes(1)
+# Display.Clear()
+# Display.SetBrightnes(1)
 
 while(True):
    now = datetime.datetime.now()
@@ -24,7 +24,7 @@ while(True):
    second = now.second
    currenttime = [ int(hour / 10), hour % 10, int(minute / 10), minute % 10 ]
 
-   Display.Show(currenttime)
-   Display.ShowDoublepoint(second % 2)
+   Display.numbers(00,currenttime)
+#    Display.ShowDoublepoint(second % 2)
 
-   time.sleep(1)
+   time.sleep(5)

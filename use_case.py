@@ -11,18 +11,18 @@ selatan = Traffic("selatan",[1, 24],[22,27,17])
 barat = Traffic("barat",[7, 23],[26,19,13])
 timur = Traffic("timur",[8, 18],[6,5,0])
 utara = Traffic("utara",[25, 15],[21,20,16])
-tm_timur= tm1637.TM1637(clk=timur.getPinTraffic()[0],dio=timur.getSevenSegment()[0])
-tm_selatan = tm1637.TM1637(clk=selatan.getPinTraffic()[0],dio=selatan.getSevenSegment()[0])
-tm_barat = tm1637.TM1637(clk=barat.getPinTraffic()[0],dio=barat.getSevenSegment()[0])
-tm_utara = tm1637.TM1637(clk=utara.getPinTraffic()[0],dio=utara.getSevenSegment()[0])
+tm_timur= tm1637.TM1637(clk=timur.getSevenSegment()[1],dio=timur.getSevenSegment()[0])
+tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1],dio=selatan.getSevenSegment()[0])
+tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1],dio=barat.getSevenSegment()[0])
+tm_utara = tm1637.TM1637(clk=utara.getSevenSegment()[1],dio=utara.getSevenSegment()[0])
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 
 ruas = {'selatan':selatan,
-'barat':barat,
-'timur':timur,
+    'barat':barat,
+    'timur':timur,
 'utara':utara}
 
 seven_segments = [tm_selatan,tm_barat,tm_timur,tm_utara]
@@ -51,7 +51,7 @@ try:
             traffic.setGreenTime(output_green)
 
             #buat seven segment
-            tm.number(traffic.getGreenTime())
+            tm.numbers(00,traffic.getGreenTime())
 
             #buat set lampu
             rotasi_lampu(traffic.getArah())
@@ -60,17 +60,21 @@ try:
             for i in range(traffic.getGreenTime()):
                 traffic.updateTime("green")
                 time.sleep(1)
-                if traffic.getGreenTime()==5:
-                    #arah selanjutanya set merah menjadi 10
-                    arah_next = get_arah_selanjutnya(traffic.getArah())
-                    arah_next.setRedTime(10)
-                    #seven segment arah next
-                    i = [i for i,e in enumerate(ruas.values()) if e==arah_next]
-                    tm_next = seven_segments[i]
+                # if traffic.getGreenTime()==5:
+                #     #arah selanjutanya set merah menjadi 10
+                #     arah_next = get_arah_selanjutnya(traffic.getArah())
+                #     arah_next.setRedTime(10)
+                #     #seven segment arah next
+                #     i = [i for i,e in enumerate(ruas.values()) if e==arah_next]
+                #     tm_next = seven_segments[i]
 
         
 except KeyboardInterrupt:
-        GPIO.cleanup()
+    tm_timur.write([0, 0, 0, 0])
+    tm_selatan.write([0,0,0,0])
+    tm_barat.write([0,0,0,0])
+    tm_utara.write([0,0,0,0])
+    GPIO.cleanup()
 # tm_.numbers()
 # timur.updateTime(green)
 # async def timurCountdown():
