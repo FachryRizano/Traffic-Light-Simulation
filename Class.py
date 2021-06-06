@@ -6,6 +6,9 @@ class Traffic:
         self.__arah = arah
         self.__seven_segment = seven_segment
         self.__pinTraffic = pinTraffic
+    
+    def getArah(self):
+        return self.__arah
         
     def getSevenSegment(self):
         return self.__seven_segment

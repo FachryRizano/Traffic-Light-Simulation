@@ -1,71 +1,73 @@
-#initiate banyak kendaraan
-# timur = 10
-#selatan = 5
-#barat = 8
-# utara = 2
 import RPi.GPIO as GPIO
 import time
 import datetime
 import tm1637
 from Class import Traffic as Traffic
 # import asyncio
-kendaraan_timur_pertama = 10
-kendaraan_selatan_pertama = 5
-kendaraan_barat_pertama = 8
-kendaraan_utara_pertama = 2
 
 
-
+#init semua ruas
 selatan = Traffic("selatan",[1, 24],[22,27,17]) 
 barat = Traffic("barat",[7, 23],[26,19,13])
 timur = Traffic("timur",[8, 18],[6,5,0])
 utara = Traffic("utara",[25, 15],[21,20,16])
-
-selatan.setStatus(False)
-barat.setStatus(False)
-timur.setStatus(True)
-utara.setStatus(False)
-
-selatan.setGreenTime(selatan.countGreenTime(kendaraan_selatan_pertama))
-barat.setGreenTime(selatan.countGreenTime(kendaraan_barat_pertama))
-timur.setGreenTime(timur.countGreenTime(kendaraan_timur_pertama))
-utara.setGreenTime(utara.countGreenTime(kendaraan_utara_pertama))
-
-
-
-timur.setRedTime(10)
-selatan.setRedTime(selatan.countRedTime(timur))
-barat.setRedTime(barat.countRedTime(selatan))
-utara.setRedTime(utara.countRedTime(barat))
-selatan.setRedTime(10)
-barat.setRedTime(10)
-utara.setRedTime(10)
+tm_timur= tm1637.TM1637(clk=timur.getPinTraffic()[0],dio=timur.getSevenSegment()[0])
+tm_selatan = tm1637.TM1637(clk=selatan.getPinTraffic()[0],dio=selatan.getSevenSegment()[0])
+tm_barat = tm1637.TM1637(clk=barat.getPinTraffic()[0],dio=barat.getSevenSegment()[0])
+tm_utara = tm1637.TM1637(clk=utara.getPinTraffic()[0],dio=utara.getSevenSegment()[0])
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-tm_timur= tm1637.TM1637(clk=timur.getPinTraffic()[0],dio=timur.getDio())
-tm_selatan = tm1637.TM1637(clk=selatan.getPinTraffic()[0],dio=selatan.getDio())
-tm_barat = tm1637.TM1637(clk=barat.getPinTraffic()[0],dio=barat.getDio())
-tm_utara = tm1637.TM1637(clk=utara.getPinTraffic()[0],dio=utara.getDio())
 
-ruas = [timur,selatan,barat,utara]
+ruas = {'selatan':selatan,
+'barat':barat,
+'timur':timur,
+'utara':utara}
 
+seven_segments = [tm_selatan,tm_barat,tm_timur,tm_utara]
 green = "green"
 red = "red"
 yellow = "yellow"
 
-angka = 10
+#request dari Firebase API
+lst_carr=[4,6,7,9]
+def rotasi_lampu(traffic):
+    for r in ruas.keys():
+        if r==traffic:
+            ruas[r].light_on(green)
+        else:
+            ruas[r].light_on(red)  
 
+def get_arah_selanjutnya(traffic_sekarang):
+    for i,k in enumerate(ruas.keys()):
+        if k==traffic_sekarang:
+            return ruas.values()[i] 
 try:
     while(True):
-        tm_timur.number(angka)
-        time.sleep(1)
+        GPIO.cleanup()
+        for traffic,tm in zip(ruas.values(),seven_segments):
+            output_green = 10
+            traffic.setGreenTime(output_green)
 
+            #buat seven segment
+            tm.number(traffic.getGreenTime())
 
-        # tm_timur.number(0)
+            #buat set lampu
+            rotasi_lampu(traffic.getArah())
+            
+            #decreasing time
+            for i in range(traffic.getGreenTime()):
+                traffic.updateTime("green")
+                time.sleep(1)
+                if traffic.getGreenTime()==5:
+                    #arah selanjutanya set merah menjadi 10
+                    arah_next = get_arah_selanjutnya(traffic.getArah())
+                    arah_next.setRedTime(10)
+                    #seven segment arah next
+                    i = [i for i,e in enumerate(ruas.values()) if e==arah_next]
+                    tm_next = seven_segments[i]
 
-        angka -= 1
         
 except KeyboardInterrupt:
         GPIO.cleanup()
