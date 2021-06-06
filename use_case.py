@@ -16,19 +16,19 @@ kendaraan_utara_pertama = 2
 
 
 
-timur = Traffic("timur",24,[23,27,17])
-selatan = Traffic("selatan",6,[21,20,16]) 
-barat = Traffic("barat",13,[7,8,25])
-utara = Traffic("utara",19,[18,15,14])
+selatan = Traffic("selatan",[1, 24],[22,27,17]) 
+barat = Traffic("barat",[7, 23],[26,19,13])
+timur = Traffic("timur",[8, 18],[6,5,0])
+utara = Traffic("utara",[25, 15],[21,20,16])
 
-timur.setStatus(True)
 selatan.setStatus(False)
 barat.setStatus(False)
+timur.setStatus(True)
 utara.setStatus(False)
 
-timur.setGreenTime(timur.countGreenTime(kendaraan_timur_pertama))
 selatan.setGreenTime(selatan.countGreenTime(kendaraan_selatan_pertama))
 barat.setGreenTime(selatan.countGreenTime(kendaraan_barat_pertama))
+timur.setGreenTime(timur.countGreenTime(kendaraan_timur_pertama))
 utara.setGreenTime(utara.countGreenTime(kendaraan_utara_pertama))
 
 
