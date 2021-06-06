@@ -25,8 +25,24 @@ yellow = "yellow"
 
 def main():
     #init semua ruas
-
-    
+    selatan = Traffic("selatan",[1, 24],[22,27,17]) 
+    barat = Traffic("barat",[7, 23],[26,19,13])
+    timur = Traffic("timur",[8, 18],[6,5,0])
+    utara = Traffic("utara",[25, 15],[21,20,16])
+    tm_timur= tm1637.TM1637(clk=timur.getSevenSegment()[1],dio=timur.getSevenSegment()[0])
+    tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1],dio=selatan.getSevenSegment()[0])
+    tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1],dio=barat.getSevenSegment()[0])
+    tm_utara = tm1637.TM1637(clk=utara.getSevenSegment()[1],dio=utara.getSevenSegment()[0])
+    tm_timur.write([0, 0, 0, 0])
+    tm_selatan.write([0,0,0,0])
+    tm_barat.write([0,0,0,0])
+    tm_utara.write([0,0,0,0])
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    red = "red"
+    green  = "green"
+    yellow = "yellow"
+        
 
 
     ruas = [selatan,barat,timur,utara]
@@ -93,7 +109,7 @@ def main():
                     
                 tm_next.numbers(00,arah_next.getRedTime())
                 arah_next.updateTime("red")
-                if arah_next.getRedTime()==3:
+                if arah_next.getRedTime()==2:
                     arah_next.light_on(yellow)
                 if arah_next.getRedTime()<-1:
                     break
