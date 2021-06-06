@@ -2,13 +2,13 @@ import RPi.GPIO as GPIO
 #import asyncio
 class Traffic:
 
-    def __init__(self,arah, dio,pinTraffic):
+    def __init__(self,arah,seven_segment,pinTraffic):
         self.__arah = arah
-        self.__dio = dio
+        self.__seven_segment = seven_segment
         self.__pinTraffic = pinTraffic
         
-    def getDio(self):
-        return self.__dio
+    def getSevenSegment(self):
+        return self.__seven_segment
 
     def getGreenTime(self):
         return self.__greentime
