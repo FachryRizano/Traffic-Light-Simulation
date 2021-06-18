@@ -5,12 +5,14 @@ import tm1637
 from Class import Traffic as Traffic
 # import asyncio
 import random
+from firebase import firebase
 import tensorflow as tf
+import numpy as np
 
 selatan = Traffic("selatan", [1, 24], [22, 27, 17])
 barat = Traffic("barat", [7, 23], [26, 19, 13])
-timur = Traffic("timur", [8, 18], [6, 5, 0])
-utara = Traffic("utara", [25, 15], [21, 20, 16])
+timur = Traffic("timur", [8, 18], [21, 20, 16])
+utara = Traffic("utara", [25, 15], [6, 5, 0])
 tm_timur = tm1637.TM1637(clk=timur.getSevenSegment()[1], dio=timur.getSevenSegment()[0])
 tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1], dio=selatan.getSevenSegment()[0])
 tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1], dio=barat.getSevenSegment()[0])
@@ -24,14 +26,18 @@ GPIO.setmode(GPIO.BCM)
 red = "red"
 green = "green"
 yellow = "yellow"
-model = tf.keras.models.load_model('ANN/saved_model.pb')
+model = tf.keras.models.load_model('ANN')
+
+
+firebase = firebase.FirebaseApplication('https://dynamic-traffic-light-default-rtdb.firebaseio.com', None)
+lst_car =  list(firebase.get('/Vehicle/ruas/', "").values())
 
 def main():
     # init semua ruas
     selatan = Traffic("selatan", [1, 24], [22, 27, 17])
     barat = Traffic("barat", [7, 23], [26, 19, 13])
-    timur = Traffic("timur", [8, 18], [6, 5, 0])
-    utara = Traffic("utara", [25, 15], [21, 20, 16])
+    timur = Traffic("timur", [8, 18], [21, 20, 16])
+    utara = Traffic("utara", [25, 15], [6, 5, 0])
     tm_timur = tm1637.TM1637(clk=timur.getSevenSegment()[1], dio=timur.getSevenSegment()[0])
     tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1], dio=selatan.getSevenSegment()[0])
     tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1], dio=barat.getSevenSegment()[0])
@@ -77,18 +83,22 @@ def main():
                     return seven_segments[i+1]
 
     for traffic, tm in zip(ruas, seven_segments):
-        # output_green = RNNGenetic.predict(FirebaseAPI)
-        #brutefore
-        #nerima array dari FIrebase API
+        # output_green = RNNGenetic.predict(irebaseAPI
+       #brtfore
+    #nerima aray dari FIrebase API
+        # print(model.summary())
+        # print(model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis,...]))
         if traffic.getArah()=='selatan':
-            output_green = model.predict(arr[0],arr[1],arr[2],arr[3])
+            output_green = model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis])
         elif traffic.getArah()=='barat':
-            output_green = model.predict(arr[1],arr[2],arr[3],arr[0])
+            output_green = model.predict(np.array([lst_car[1],lst_car[2],lst_car[3],lst_car[0]])[np.newaxis])
         elif traffic.getArah()=='timur':
-            output_green = model.predict(arr[2],arr[3],arr[0],arr[1])
-        else:
-            output_green = model.predict(arr[3],arr[0],arr[1],arr[2])
-        # output_green = random.randint(10, 15)
+            output_green = model.predict(np.array([lst_car[2],lst_car[3],lst_car[0],lst_car[1]])[np.newaxis])
+        elif traffic.getArah()=='utara':
+            output_green = model.predict(np.array([lst_car[3],lst_car[0],lst_car[1],lst_car[2]])[np.newaxis])
+        output_green = int(output_green)
+        # output_green = 15
+
         traffic.setGreenTime(output_green)
 
         #buat seven segment
@@ -118,13 +128,13 @@ def main():
                     tm.numbers(00, traffic.getGreenTime())
                     traffic.updateTime("green")
 
-                tm_next.numbers(00, arah_next.getRedTime())
-                arah_next.updateTime("red")
-                if arah_next.getRedTime() == 2:
+                if arah_next.getRedTime() == 3:
                     arah_next.light_on(yellow)
-                if arah_next.getRedTime() < -1:
+                if arah_next.getRedTime() < 0:
                     break
-
+                else:
+                    tm_next.numbers(00, arah_next.getRedTime())
+                    arah_next.updateTime("red")
             else:
                 tm.numbers(00, traffic.getGreenTime())
                 traffic.updateTime("green")
@@ -139,11 +149,11 @@ if __name__ == "__main__":
                 # loop = asyncio.get_event_loop()
                 # loop.run_until_complete(main())
                 main()
-                tm_timur.write([0, 0, 0, 0])
-                tm_selatan.write([0, 0, 0, 0])
-                tm_barat.write([0, 0, 0, 0])
-                tm_utara.write([0, 0, 0, 0])
-                GPIO.cleanup()
+            tm_timur.write([0, 0, 0, 0])
+            tm_selatan.write([0, 0, 0, 0])
+            tm_barat.write([0, 0, 0, 0])
+            tm_utara.write([0, 0, 0, 0])
+            GPIO.cleanup()
     except KeyboardInterrupt:
         tm_timur.write([0, 0, 0, 0])
         tm_selatan.write([0, 0, 0, 0])
