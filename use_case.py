@@ -5,6 +5,7 @@ import tm1637
 from Class import Traffic as Traffic
 # import asyncio
 import random
+import tensorflow as tf
 
 selatan = Traffic("selatan", [1, 24], [22, 27, 17])
 barat = Traffic("barat", [7, 23], [26, 19, 13])
@@ -23,7 +24,7 @@ GPIO.setmode(GPIO.BCM)
 red = "red"
 green = "green"
 yellow = "yellow"
-
+model = tf.keras.models.load_model('ANN/saved_model.pb')
 
 def main():
     # init semua ruas
@@ -77,7 +78,17 @@ def main():
 
     for traffic, tm in zip(ruas, seven_segments):
         # output_green = RNNGenetic.predict(FirebaseAPI)
-        output_green = random.randint(10, 15)
+        #brutefore
+        #nerima array dari FIrebase API
+        if traffic.getArah()=='selatan':
+            output_green = model.predict(arr[0],arr[1],arr[2],arr[3])
+        elif traffic.getArah()=='barat':
+            output_green = model.predict(arr[1],arr[2],arr[3],arr[0])
+        elif traffic.getArah()=='timur':
+            output_green = model.predict(arr[2],arr[3],arr[0],arr[1])
+        else:
+            output_green = model.predict(arr[3],arr[0],arr[1],arr[2])
+        # output_green = random.randint(10, 15)
         traffic.setGreenTime(output_green)
 
         #buat seven segment
