@@ -30,7 +30,7 @@ model = tf.keras.models.load_model('ANN')
 
 
 firebase = firebase.FirebaseApplication('https://dynamic-traffic-light-default-rtdb.firebaseio.com', None)
-lst_car =  list(firebase.get('/Vehicle/ruas/', "").values())
+
 
 def main():
     # init semua ruas
@@ -83,6 +83,7 @@ def main():
                     return seven_segments[i+1]
 
     for traffic, tm in zip(ruas, seven_segments):
+        lst_car =  list(firebase.get('/Vehicle/ruas/', "").values())
         # output_green = RNNGenetic.predict(irebaseAPI
        #brtfore
     #nerima aray dari FIrebase API
