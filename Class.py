@@ -21,7 +21,19 @@ class Traffic:
 
     def getStatus(self):
         return self.__status
+
+    def getPinTraffic(self):
+        return self.__pinTraffic
+
+    def setGreenTime(self,greenTime):
+        self.__greentime = greenTime
+
+    def setRedTime(self,time):
+        self.__redtime = time
     
+    def setStatus(self,status):
+        self.__status = status
+
     def countGreenTime(self,total_kendaraan):
         threshold = 15
         waktu = total_kendaraan*2
@@ -30,26 +42,14 @@ class Traffic:
         else:
             return waktu
 
+    def countRedTime(self,prev):
+        return prev.getGreenTime() + prev.getRedTime() + 3
+    
     def updateTime(self,time):
         if time == "green":
             self.__greentime -= 1
         elif time == "red":
             self.__redtime -= 1
-    
-    def setStatus(self,status):
-        self.__status = status
-
-    def setGreenTime(self,greenTime):
-        self.__greentime = greenTime
-
-    def setRedTime(self,time):
-        self.__redtime = time
-
-    def countRedTime(self,prev):
-        return prev.getGreenTime() + prev.getRedTime() + 3
-
-    def getPinTraffic(self):
-        return self.__pinTraffic
 
     def light_on(self,color):
         for i in range(3):
