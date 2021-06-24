@@ -82,8 +82,8 @@ def main():
                 else:
                     return seven_segments[i+1]
 
-    for traffic, tm in zip(ruas, seven_segments):
-        lst_car =  list(firebase.get('/Vehicle/ruas/', "").values())
+    for traffic, tm in zip(road, seven_segments):
+        lst_car =  list(firebase.get('/Vehicle/road/', "").values())
         # output_green = RNNGenetic.predict(irebaseAPI
        #brtfore
     #nerima aray dari FIrebase API
