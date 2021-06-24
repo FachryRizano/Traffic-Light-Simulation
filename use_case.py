@@ -9,18 +9,18 @@ from firebase import firebase
 import tensorflow as tf
 import numpy as np
 
-selatan = Traffic("selatan", [1, 24], [22, 27, 17])
-barat = Traffic("barat", [7, 23], [26, 19, 13])
-timur = Traffic("timur", [8, 18], [21, 20, 16])
-utara = Traffic("utara", [25, 15], [6, 5, 0])
-tm_timur = tm1637.TM1637(clk=timur.getSevenSegment()[1], dio=timur.getSevenSegment()[0])
-tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1], dio=selatan.getSevenSegment()[0])
-tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1], dio=barat.getSevenSegment()[0])
-tm_utara = tm1637.TM1637(clk=utara.getSevenSegment()[1], dio=utara.getSevenSegment()[0])
-tm_timur.write([0, 0, 0, 0])
-tm_selatan.write([0, 0, 0, 0])
-tm_barat.write([0, 0, 0, 0])
-tm_utara.write([0, 0, 0, 0])
+south = Traffic("south", [1, 24], [22, 27, 17])
+west = Traffic("west", [7, 23], [26, 19, 13])
+east = Traffic("east", [8, 18], [21, 20, 16])
+north = Traffic("north", [25, 15], [6, 5, 0])
+tm_south = tm1637.TM1637(clk=south.getSevenSegment()[1], dio=south.getSevenSegment()[0])
+tm_west = tm1637.TM1637(clk=west.getSevenSegment()[1], dio=west.getSevenSegment()[0])
+tm_east = tm1637.TM1637(clk=east.getSevenSegment()[1], dio=east.getSevenSegment()[0])
+tm_north = tm1637.TM1637(clk=north.getSevenSegment()[1], dio=north.getSevenSegment()[0])
+tm_south.write([0, 0, 0, 0])
+tm_west.write([0, 0, 0, 0])
+tm_east.write([0, 0, 0, 0])
+tm_north.write([0, 0, 0, 0])
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 red = "red"
@@ -33,48 +33,48 @@ firebase = firebase.FirebaseApplication('https://dynamic-traffic-light-default-r
 lst_car =  list(firebase.get('/Vehicle/ruas/', "").values())
 
 def main():
-    # init semua ruas
-    selatan = Traffic("selatan", [1, 24], [22, 27, 17])
-    barat = Traffic("barat", [7, 23], [26, 19, 13])
-    timur = Traffic("timur", [8, 18], [21, 20, 16])
-    utara = Traffic("utara", [25, 15], [6, 5, 0])
-    tm_timur = tm1637.TM1637(clk=timur.getSevenSegment()[1], dio=timur.getSevenSegment()[0])
-    tm_selatan = tm1637.TM1637(clk=selatan.getSevenSegment()[1], dio=selatan.getSevenSegment()[0])
-    tm_barat = tm1637.TM1637(clk=barat.getSevenSegment()[1], dio=barat.getSevenSegment()[0])
-    tm_utara = tm1637.TM1637(clk=utara.getSevenSegment()[1], dio=utara.getSevenSegment()[0])
-    tm_timur.write([0, 0, 0, 0])
-    tm_selatan.write([0, 0, 0, 0])
-    tm_barat.write([0, 0, 0, 0])
-    tm_utara.write([0, 0, 0, 0])
+    # init all road
+    south = Traffic("south", [1, 24], [22, 27, 17])
+    west = Traffic("west", [7, 23], [26, 19, 13])
+    east = Traffic("east", [8, 18], [21, 20, 16])
+    north = Traffic("north", [25, 15], [6, 5, 0])
+    tm_east = tm1637.TM1637(clk=east.getSevenSegment()[1], dio=east.getSevenSegment()[0])
+    tm_south = tm1637.TM1637(clk=south.getSevenSegment()[1], dio=south.getSevenSegment()[0])
+    tm_west = tm1637.TM1637(clk=west.getSevenSegment()[1], dio=west.getSevenSegment()[0])
+    tm_north = tm1637.TM1637(clk=north.getSevenSegment()[1], dio=north.getSevenSegment()[0])
+    tm_east.write([0, 0, 0, 0])
+    tm_south.write([0, 0, 0, 0])
+    tm_west.write([0, 0, 0, 0])
+    tm_north.write([0, 0, 0, 0])
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     red = "red"
     green = "green"
     yellow = "yellow"
 
-    ruas = [selatan, barat, timur, utara]
+    road = [south, west, east, north]
 
-    seven_segments = [tm_selatan, tm_barat, tm_timur, tm_utara]
+    seven_segments = [tm_south, tm_west, tm_east, tm_north]
 
     # request dari Firebase API
     lst_carr = [4, 6, 7, 9]
 
-    def rotasi_lampu(traffic):
-        for r in ruas:
+    def traffic_cycle(traffic):
+        for r in road:
             if r.getArah() == traffic:
                 r.light_on(green)
             else:
                 r.light_on(red)
 
-    def get_arah_selanjutnya(traffic_sekarang):
-        for i, e in enumerate(ruas):
-            if e.getArah() == traffic_sekarang:
+    def get_next_road(current_traffic):
+        for i, e in enumerate(road):
+            if e.getArah() == current_traffic:
                 if i == 3:
-                    return ruas[0]
+                    return road[0]
                 else:
-                    return ruas[i+1]
+                    return road[i+1]
 
-    def tm_selanjutnya(tm):
+    def get_next_tm(tm):
         for i, e in enumerate(seven_segments):
             if e == tm:
                 if i == 3:
@@ -82,19 +82,19 @@ def main():
                 else:
                     return seven_segments[i+1]
 
-    for traffic, tm in zip(ruas, seven_segments):
+    for traffic, tm in zip(road, seven_segments):
         # output_green = RNNGenetic.predict(irebaseAPI
        #brtfore
     #nerima aray dari FIrebase API
         # print(model.summary())
-        # print(model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis,...]))
-        if traffic.getArah()=='selatan':
+        # print(model.predict(np.TM1637Decimalarray([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis,...]))
+        if traffic.getArah()=='south':
             output_green = model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis])
-        elif traffic.getArah()=='barat':
+        elif traffic.getArah()=='west':
             output_green = model.predict(np.array([lst_car[1],lst_car[2],lst_car[3],lst_car[0]])[np.newaxis])
-        elif traffic.getArah()=='timur':
+        elif traffic.getArah()=='east':
             output_green = model.predict(np.array([lst_car[2],lst_car[3],lst_car[0],lst_car[1]])[np.newaxis])
-        elif traffic.getArah()=='utara':
+        elif traffic.getArah()=='north':
             output_green = model.predict(np.array([lst_car[3],lst_car[0],lst_car[1],lst_car[2]])[np.newaxis])
         output_green = int(output_green)
         # output_green = 15
@@ -104,20 +104,20 @@ def main():
         #buat seven segment
 
         #buat set lampu
-        rotasi_lampu(traffic.getArah())
+        traffic_cycle(traffic.getArah())
 
         #decreasing time
         while True:
             if traffic.getGreenTime() == 5:
                 # arah selanjutanya set merah menjadi 10
-                arah_next = get_arah_selanjutnya(traffic.getArah())
-                arah_next.setRedTime(10)
+                next_road = get_next_road(traffic.getArah())
+                next_road.setRedTime(10)
                 # seven segment arah next
-                tm_next = tm_selanjutnya(tm)
-                tm_next.numbers(00, arah_next.getRedTime())
+                tm_next = get_next_tm(tm)
+                tm_next.numbers(00, next_road.getRedTime())
                 tm.numbers(00, traffic.getGreenTime())
                 traffic.updateTime("green")
-                arah_next.updateTime("red")
+                next_road.updateTime("red")
             elif traffic.getGreenTime() < 5:
                 if traffic.getGreenTime() == 3:
                     traffic.light_on(yellow)
@@ -128,13 +128,13 @@ def main():
                     tm.numbers(00, traffic.getGreenTime())
                     traffic.updateTime("green")
 
-                if arah_next.getRedTime() == 3:
-                    arah_next.light_on(yellow)
-                if arah_next.getRedTime() < 0:
+                if next_road.getRedTime() == 3:
+                    next_road.light_on(yellow)
+                if next_road.getRedTime() < 0:
                     break
                 else:
-                    tm_next.numbers(00, arah_next.getRedTime())
-                    arah_next.updateTime("red")
+                    tm_next.numbers(00, next_road.getRedTime())
+                    next_road.updateTime("red")
             else:
                 tm.numbers(00, traffic.getGreenTime())
                 traffic.updateTime("green")
@@ -149,14 +149,14 @@ if __name__ == "__main__":
                 # loop = asyncio.get_event_loop()
                 # loop.run_until_complete(main())
                 main()
-            tm_timur.write([0, 0, 0, 0])
-            tm_selatan.write([0, 0, 0, 0])
-            tm_barat.write([0, 0, 0, 0])
-            tm_utara.write([0, 0, 0, 0])
+            tm_east.write([0, 0, 0, 0])
+            tm_south.write([0, 0, 0, 0])
+            tm_west.write([0, 0, 0, 0])
+            tm_north.write([0, 0, 0, 0])
             GPIO.cleanup()
     except KeyboardInterrupt:
-        tm_timur.write([0, 0, 0, 0])
-        tm_selatan.write([0, 0, 0, 0])
-        tm_barat.write([0, 0, 0, 0])
-        tm_utara.write([0, 0, 0, 0])
+        tm_east.write([0, 0, 0, 0])
+        tm_south.write([0, 0, 0, 0])
+        tm_west.write([0, 0, 0, 0])
+        tm_north.write([0, 0, 0, 0])
         GPIO.cleanup()
