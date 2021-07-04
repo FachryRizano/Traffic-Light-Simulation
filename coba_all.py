@@ -55,10 +55,10 @@ tm_timur = tm1637.TM1637(clk=18, dio=8)
 
 try:
     while True:
-        tm_selatan.numbers(01, 30)
-        tm_barat.numbers(02, 21)
-        tm_timur.numbers(03, 26)
-        tm_utara.numbers(04, 45)
+        tm_selatan.numbers(1, 30)
+        tm_barat.numbers(2, 21)
+        tm_timur.numbers(3, 26)
+        tm_utara.numbers(4, 45)
 
         # GPIO.output(red,True)
         # GPIO.output(yellow,False)
@@ -108,9 +108,9 @@ try:
         # GPIO.output(yellow_3,False)
         # GPIO.output(green_3,True)
 
-        # GPIO.output(red_4,False)
-        # GPIO.output(yellow_4,False)
-        # GPIO.output(green_4,True)
+        GPIO.output(red_4,False)
+        GPIO.output(yellow_4,False)
+        GPIO.output(green_4,True)
         
         time.sleep(1)
 
