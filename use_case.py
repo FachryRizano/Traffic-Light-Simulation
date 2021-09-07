@@ -57,7 +57,7 @@ def main():
     seven_segments = [tm_south, tm_west, tm_east, tm_north]
 
     # request dari Firebase API
-    lst_carr = [4, 6, 7, 9]
+    # lst_carr = [4, 6, 7, 9]
 
     def traffic_cycle(traffic):
         for r in road:
@@ -84,23 +84,58 @@ def main():
 
     for traffic, tm in zip(road, seven_segments):
         lst_car =  list(firebase.get('/Vehicle/road/', "").values())
+        # print(int(model.predict(np.array([lst_car[2],lst_car[3],lst_car[0],lst_car[1]])[np.newaxis])))
+        # print(int(model.predict(np.array([lst_car[3],lst_car[0],lst_car[1],lst_car[2]])[np.newaxis])))
+        # print(int(model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis])))
+        # print(int(model.predict(np.array([lst_car[1],lst_car[2],lst_car[3],lst_car[0]])[np.newaxis])))
+            
         # output_green = RNNGenetic.predict(irebaseAPI
        #brtfore
     #nerima aray dari FIrebase API
         # print(model.summary())
         # print(model.predict(np.TM1637Decimalarray([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis,...]))
         if traffic.getArah()=='south':
-            output_green = model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis])
+            if lst_car[2] == 0:
+                output_green = 5
+            else:
+                output_green = model.predict(np.array([lst_car[2],lst_car[3],lst_car[0],lst_car[1]])[np.newaxis])
+            print("{} total car: {} B={} T={} U={}".format(str(traffic.getArah()), lst_car[2], lst_car[3], lst_car[0], lst_car[1]))
         elif traffic.getArah()=='west':
-            output_green = model.predict(np.array([lst_car[1],lst_car[2],lst_car[3],lst_car[0]])[np.newaxis])
+            if lst_car[3] == 0:
+                output_green = 5
+            else:
+                output_green = model.predict(np.array([lst_car[3],lst_car[0],lst_car[1],lst_car[2]])[np.newaxis])
+            print("{} total car: {} T={} U={} S={}".format(str(traffic.getArah()), lst_car[3], lst_car[0], lst_car[1], lst_car[2]))
         elif traffic.getArah()=='east':
-            output_green = model.predict(np.array([lst_car[2],lst_car[3],lst_car[0],lst_car[1]])[np.newaxis])
+            if lst_car[0] == 0:
+                output_green = 5
+            else:
+                output_green = model.predict(np.array([lst_car[0],lst_car[1],lst_car[2],lst_car[3]])[np.newaxis])
+            print("{} total car: {} U={} S={} B={}".format(str(traffic.getArah()), lst_car[0], lst_car[1], lst_car[2], lst_car[3]))
         elif traffic.getArah()=='north':
-            output_green = model.predict(np.array([lst_car[3],lst_car[0],lst_car[1],lst_car[2]])[np.newaxis])
+            if lst_car[1] == 0:
+                output_green = 5
+            else:
+                output_green = model.predict(np.array([lst_car[1],lst_car[2],lst_car[3],lst_car[0]])[np.newaxis])
+            print("{} total car: {} S={} B={} T={}".format(str(traffic.getArah()), lst_car[1], lst_car[2], lst_car[3], lst_car[0]))
         output_green = int(output_green)
-        # output_green = 15
 
+        #scaling
+        threshold_min = 14
+        threshold_max = 56
+        scaled_output_green = int(output_green / 3)
+        print("{} :: output from model: {},output after scaled: {}".format(str(traffic.getArah()), output_green, scaled_output_green))
+
+        if output_green < threshold_min:
+            output_green = threshold_min
+        elif output_green > threshold_max:
+            output_green = threshold_max
+
+        print("output to seven segment: {}".format(output_green))
         traffic.setGreenTime(output_green)
+        
+        #Rumus Scaling
+        #new_value = ( (old_value - old_min) / (old_max - old_min) ) * (new_max - new_min) + new_min
 
         #buat seven segment
 
